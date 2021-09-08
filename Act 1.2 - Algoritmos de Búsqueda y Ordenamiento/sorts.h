@@ -10,8 +10,8 @@ class Sorts
         void ordenaSeleccion(std::vector<T>);
         void ordenaBurbuja(std::vector<T>);
         void ordenaMerge(std::vector<T>);
-        void busqSecuencial(std::vector<T>, T);
-        void busqBinaria(std::vector<T>, T);
+        T busqSecuencial(std::vector<T>, T);
+        T busqBinaria(std::vector<T>, T);
     private:
         void swap(std::vector<T>, int, int);
 };
