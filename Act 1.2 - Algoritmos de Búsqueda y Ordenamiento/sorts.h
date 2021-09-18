@@ -33,11 +33,11 @@ int Sorts<T>::busqBinaria(std::vector<T> sorted, T value)
         }
         else if (sorted[mid] > value)
         {
-            low = mid + 1;
+            high = mid - 1;
         }
         else
         {
-            high = mid - 1;
+            low = mid + 1;
         }
     }
     return -1;
