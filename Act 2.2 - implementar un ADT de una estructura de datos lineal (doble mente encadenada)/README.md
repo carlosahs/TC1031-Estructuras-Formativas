@@ -9,7 +9,7 @@ This operation requires to iterate over the `n` nodes of the doubly linked list
 regardless of having a head and tail. This is due to the fact that `search`
 must search for the first node that matches the searched value, which could be
 closer to the head or closer to the tail. As such, it is required to iterate
-over all the nodes because of that uncertainty.
+over all the nodes because of that uncertainty, having time complexity `O(n)`.
 
 ## `update`
 This operation can take advantage of the head an tail of the doubly linked
