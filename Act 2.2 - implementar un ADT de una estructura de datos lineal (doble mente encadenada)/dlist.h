@@ -70,8 +70,16 @@ template <class T>
 T DList<T>::deleteAt(int index) {
     DLink<T>* toDelete;
     toDelete = dlinkAt(index);
-    toDelete->next->previous = toDelete->previous;
-    toDelete->previous->next = toDelete->next;
+    if (toDelete == head) {
+        toDelete->next->previous = 0;
+        head = toDelete->next;
+    } else if (toDelete == tail) {
+        toDelete->previous->next = 0;
+        tail = toDelete->previous;
+    } else {
+        toDelete->next->previous = toDelete->previous;
+        toDelete->previous->next = toDelete->next;
+    }
     T value = toDelete->value;
     delete toDelete;
     size--;
