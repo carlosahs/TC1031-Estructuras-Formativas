@@ -22,35 +22,112 @@
 #include <stack>
 #include <list>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 
-
 class Graph {
-private:
+    private:
 		int edgesList;
 		int edgesMat;
 		int nodes;
-    vector<int> *adjList;
-		int *adjMatrix;
-		//vector<Type> *vect = new vector<Type>
 
-public:
-		void loadGraphMat(string, int, int);
+		int* adjMatrix;
+
+        vector<int>* adjList;
+
+        // >>> student methods
+        void dfs_helper(const vector<int>&, const int&, set<int>&,
+                        stack<int>&, bool&);
+        // <<< student methods
+    public:
 		Graph(int);
 		Graph();
+
+		void loadGraphMat(string, int, int);
 		void addEdgeAdjMatrix(int, int);
+		void sortAdjList();
+
+        // >>> student methods
+        void loadGraphList(string, int, int);
+
+        string DFS(int, int);
+        string BFS(int, int);
+        // <<< student methods
+
 		string printAdjMat();
 		string printAdjMat_clean();
+        string printAdjList();
+
 		bool contains(list<int>, int);
-		void sortAdjList();
 };
 
+void Graph::dfs_helper(const vector<int>& neighboors, const int& goal,
+                       set<int>& visited, stack<int>& path,
+                       bool& found_path) {
+    for (int neighboor : neighboors) {
+        if (visited.find(neighboor) == visited.end()) {
+            continue;
+        }
+
+        visited.insert(neighboor);
+        path.push(neighboor);
+
+        if (neighboor == goal) {
+            found_path = true;
+            return;
+        }
+
+        dfs_helper(adjList[neighboor], goal, visited, path, found_path);
+
+        if (found_path) {
+            return;
+        }
+
+        path.pop();
+    }
+}
+
+string Graph::DFS(int from, int goal) {
+    string visited_str = "visited: ";   
+    bool found_path = false;
+
+    set<int> visited;
+    stack<int> path;
+
+    visited.insert(from);
+    path.push(from);
+
+    dfs_helper(adjList[from], goal, visited, path, found_path);
+
+    return visited_str;
+}
+
+void Graph::loadGraphList(string file, int nodes_, int edges) {
+    adjList = new vector<int>[nodes];
+    edgesList = edges;
+    nodes = nodes_;
+
+    ifstream file_stream(file);
+    string file_line;
+
+    pair<int, int> edge;
+
+    if (file_stream.is_open()) {
+        while (getline(file_stream, file_line)) {
+            edge.first = stoi(file_line.substr(1,1));
+            edge.second = stoi(file_line.substr(4,1));
+
+            adjList[edge.first].push_back(edge.second);
+            adjList[edge.second].push_back(edge.first);
+        }
+    }
+}
 
 void Graph::loadGraphMat(string name, int a, int b){
 	adjMatrix = new int [a*b];
 	nodes = a;
-	for (int i = 0; i < a*b; i++)
+	for (int i = 0; i < a*b; i++) {
 		adjMatrix[i] = 0;
 		string line;
 		ifstream lee (name);
@@ -65,6 +142,7 @@ void Graph::loadGraphMat(string name, int a, int b){
 		} else {
 			cout << "Unable to open file";
 		}
+    }
 }
 
 Graph::Graph() {
@@ -86,18 +164,20 @@ void Graph::addEdgeAdjMatrix(int u, int v){
 	edgesMat++;
 }
 
-string Graph::printAdjList(){
-	  stringstream aux;
-		for (int i = 0; i < nodes; i++){
-	        aux << "vertex "
-	             << i << " :";
-	        for (int j = 0; j < adjList[i].size(); j ++){
-							 aux << " " << adjList[i][j];
-					}
-	        aux << " ";
-    }
-		return aux.str();
+string Graph::printAdjList() {
+    stringstream aux;
+    for (int i = 0; i < nodes; i++) {
+        aux << "vertex "
+             << i << " :";
 
+        for (int j = 0; j < adjList[i].size(); j ++){
+             aux << " " << adjList[i][j];
+        }
+
+        aux << " ";
+    }
+
+    return aux.str();
 }
 
 string Graph::printAdjMat(){
@@ -113,21 +193,28 @@ string Graph::printAdjMat(){
 string Graph::printAdjMat_clean(){
 	stringstream aux;
 	aux << "\n nodes \t|";
-	for (int i = 0; i < nodes; i++){
-			aux << "\t" << i ;
+
+	for (int i = 0; i < nodes; i++) {
+        aux << "\t" << i ;
 	}
+
 	aux << "\n";
-	for (int i = 0; i < nodes; i++){
-			aux << "__________";
+
+	for (int i = 0; i < nodes; i++) {
+        aux << "__________";
 	}
+
 	aux << "\n";
-	for (int i = 0; i < nodes; i++){
-		 aux << i << "\t|";
-	   for (int j = 0; j < nodes; j++){
-			 aux << "\t" << adjMatrix[i*nodes+j];
-		 }
-	   aux << "\n";
-  }
+
+	for (int i = 0; i < nodes; i++) {
+		aux << i << "\t|";
+
+	    for (int j = 0; j < nodes; j++) {
+            aux << "\t" << adjMatrix[i*nodes+j];
+		}
+
+	    aux << "\n";
+    }
 	return aux.str();
 }
 
