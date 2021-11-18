@@ -39,6 +39,9 @@ class Graph {
         // >>> student methods
         void dfs_helper(const vector<int>&, const int&, set<int>&,
                         stack<int>&, bool&);
+        void bfs_helper(const vector<int>&, const int&, set<int>&,
+                        queue<int>&, queue<stack<int>>&, stack<int>&,
+                        bool&);
         // <<< student methods
     public:
 		Graph(int);
@@ -62,11 +65,90 @@ class Graph {
 		bool contains(list<int>, int);
 };
 
+void Graph::bfs_helper(const vector<int>& neighboors, const int& goal,
+                       set<int>& visited, queue<int>& ledger,
+                       queue<stack<int>>& paths, stack<int>& path,
+                       bool& found_path) {
+    for (int neighboor : neighboors) {
+        if (visited.find(neighboor) != visited.end()) {
+            continue;
+        }
+
+        visited.insert(neighboor);
+        ledger.push(neighboor);
+
+        path.push(neighboor);
+        paths.push(path);
+
+        if (neighboor == goal) {
+            found_path = true;
+            return;
+        }
+
+        path.pop();
+    }
+}
+
+string Graph::BFS(int start, int goal) {
+    stringstream visited_and_path("");
+    bool found_path = false;
+
+    set<int> visited;
+    queue<int> ledger;
+
+    stack<int> path;
+    queue<stack<int>> paths;
+
+    visited.insert(start);
+    ledger.push(start);
+
+    path.push(start);
+    paths.push(path);
+
+    while (!ledger.empty()) {
+        int node = ledger.front();
+        path = paths.front();
+
+        ledger.pop();
+        paths.pop();
+
+        bfs_helper(adjList[node], goal, visited, ledger,
+                   paths, path, found_path);
+        
+        if (found_path) {
+            break;
+        }
+    }
+
+    visited_and_path << "visited:";
+
+    for (auto it = visited.begin(); it != visited.end(); it++) {
+        visited_and_path << " " << *it;
+    }
+
+    visited_and_path << " path:";
+
+    if (found_path) {
+        stringstream path_str("");
+
+        while (!path.empty()) {
+            path_str << path.top() << " ";
+            path.pop();
+        }
+
+        string path_rstr = path_str.str();
+
+        visited_and_path << string(path_rstr.rbegin(), path_rstr.rend());
+    }
+
+    return visited_and_path.str();
+}
+
 void Graph::dfs_helper(const vector<int>& neighboors, const int& goal,
                        set<int>& visited, stack<int>& path,
                        bool& found_path) {
     for (int neighboor : neighboors) {
-        if (visited.find(neighboor) == visited.end()) {
+        if (visited.find(neighboor) != visited.end()) {
             continue;
         }
 
@@ -89,9 +171,9 @@ void Graph::dfs_helper(const vector<int>& neighboors, const int& goal,
 }
 
 string Graph::DFS(int from, int goal) {
-    string visited_str = "visited: ";   
     bool found_path = false;
 
+    stringstream visited_and_path("");   
     set<int> visited;
     stack<int> path;
 
@@ -100,13 +182,34 @@ string Graph::DFS(int from, int goal) {
 
     dfs_helper(adjList[from], goal, visited, path, found_path);
 
-    return visited_str;
+    visited_and_path << "visited:";
+
+    for (auto it = visited.begin(); it != visited.end(); it++) {
+        visited_and_path << " " << *it;
+    }
+
+    visited_and_path << " path:";
+
+    if (found_path) {
+        stringstream path_str("");
+
+        while (!path.empty()) {
+            path_str << path.top() << " ";
+            path.pop();
+        }
+
+        string path_rstr = path_str.str();
+
+        visited_and_path << string(path_rstr.rbegin(), path_rstr.rend());
+    }
+
+    return visited_and_path.str();
 }
 
 void Graph::loadGraphList(string file, int nodes_, int edges) {
-    adjList = new vector<int>[nodes];
     edgesList = edges;
     nodes = nodes_;
+    adjList = new vector<int>[nodes];
 
     ifstream file_stream(file);
     string file_line;
@@ -121,6 +224,7 @@ void Graph::loadGraphList(string file, int nodes_, int edges) {
             adjList[edge.first].push_back(edge.second);
             adjList[edge.second].push_back(edge.first);
         }
+        file_stream.close();
     }
 }
 
