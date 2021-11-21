@@ -1,6 +1,7 @@
 #ifndef BST_H
 #define BST_H
 
+#include <iostream>
 #include <queue>
 #include <string>
 #include <sstream>
@@ -69,11 +70,11 @@ class BST {
         u32 tree_height;
 
         void traversal(strs&, Traversal);
-        void preorder(strs&, const Node<T>*&);
-        void inorder(strs&, const Node<T>*&);
-        void postorder(strs&, const Node<T>*&);
-        void level_by_level(strs&, const Node<T>*&);
-        void retrieve_children(std::queue<Node<T>*>&, const Node<T>*&);
+        void preorder(strs&, Node<T>*&);
+        void inorder(strs&, Node<T>*&);
+        void postorder(strs&, Node<T>*&);
+        void level_by_level(strs&, Node<T>*&);
+        void retrieve_children(std::queue<Node<T>*>&, Node<T>*&);
     public:
         BST();
         ~BST();
@@ -104,13 +105,21 @@ template <typename T>
 void BST<T>::add(T value) {
     if (root == 0) {
         root = new Node<T>(value);
+        tree_height = 1;
         return;
     }
 
-    Node<T>* node = root;
+    Node<T>* node;
+    Node<T>* parent;
+
+    node = root;
+    parent = root;
+
     u32 node_height = 0;
 
     while (node != 0) {
+        parent = node;
+
         if (value >= node->value) {
             node = node->right;
         } else if (value < node->value) {
@@ -120,12 +129,17 @@ void BST<T>::add(T value) {
         node_height++;
     }
 
+    if (value >= parent->value) {
+        parent->right = new Node<T>(value);
+    } else if (value < parent->value) {
+        parent->left = new Node<T>(value);
+    }
+
     if (++node_height > tree_height) {
         tree_height = node_height;
     }
-
-    node = new Node<T>(value);
 }
+
 template <typename T>
 str BST<T>::ancestors(const T& value) {
     strs ancestors_str("");
@@ -143,7 +157,7 @@ str BST<T>::ancestors(const T& value) {
             node = node->left;
         }
 
-        if (node->value != value) {
+        if (node != 0 && node->value != value) {
             ancestors_str << " ";
         }
     }
@@ -184,7 +198,7 @@ void BST<T>::traversal(strs& visited, Traversal trav) {
 }
 
 template <typename T>
-void BST<T>::preorder(strs& visited, const Node<T>*& node) {
+void BST<T>::preorder(strs& visited, Node<T>*& node) {
     visited << node->value;
 
     if (node->left != 0) {
@@ -199,7 +213,7 @@ void BST<T>::preorder(strs& visited, const Node<T>*& node) {
 }
 
 template <typename T>
-void BST<T>::inorder(strs& visited, const Node<T>*& node) {
+void BST<T>::inorder(strs& visited, Node<T>*& node) {
     if (node->left != 0) {
         inorder(visited, node->left);
         visited << " ";
@@ -208,20 +222,20 @@ void BST<T>::inorder(strs& visited, const Node<T>*& node) {
     visited << node->value;
 
     if (node->right != 0) {
-        inorder(visited, node->right);
         visited << " ";
+        inorder(visited, node->right);
     }
 }
 
 template <typename T>
-void BST<T>::postorder(strs& visited, const Node<T>*& node) {
+void BST<T>::postorder(strs& visited, Node<T>*& node) {
     if (node->left != 0) {
-        inorder(visited, node->left);
+        postorder(visited, node->left);
         visited << " ";
     }
 
     if (node->right != 0) {
-        inorder(visited, node->right);
+        postorder(visited, node->right);
         visited << " ";
     }
 
@@ -229,7 +243,7 @@ void BST<T>::postorder(strs& visited, const Node<T>*& node) {
 }
 
 template <typename T>
-void BST<T>::level_by_level(strs& visited, const Node<T>*& node) {
+void BST<T>::level_by_level(strs& visited, Node<T>*& node) {
     visited << node->value;
 
     std::queue<Node<T>*> children;
@@ -254,7 +268,7 @@ void BST<T>::level_by_level(strs& visited, const Node<T>*& node) {
 
 template <typename T>
 void BST<T>::retrieve_children(std::queue<Node<T>*>& children, 
-                               const Node<T>*& child) {
+                               Node<T>*& child) {
     if (child->left != 0) {
         children.push(child->left);
     }
