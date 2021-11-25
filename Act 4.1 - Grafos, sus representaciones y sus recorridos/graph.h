@@ -226,12 +226,6 @@ void Graph::loadGraphList(string file, int nodes_, int edges) {
         }
         file_stream.close();
     }
-
-    // add unnecesary sort so that the nodes are in EXACTLY the
-    // same order as those in the test 2
-    for (int i = 0; i < nodes; i++) {
-        sort(adjList[i].begin(), adjList[i].end());
-    }
 }
 
 void Graph::loadGraphMat(string name, int a, int b){
